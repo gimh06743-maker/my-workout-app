@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <rect width="512" height="512" rx="100" fill="#4a90d9"/>
+  <rect width="512" height="512" rx="100" fill="url(#grad)"/>
+  <defs>
+    <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#6ab0f5"/>
+      <stop offset="100%" style="stop-color:#4a90d9"/>
+    </linearGradient>
+  </defs>
+  <!-- Dumbbell icon -->
+  <rect x="176" y="236" width="160" height="40" rx="20" fill="white" opacity="0.95"/>
+  <!-- Left weight -->
+  <rect x="120" y="196" width="36" height="120" rx="18" fill="white" opacity="0.95"/>
+  <rect x="96" y="216" width="32" height="80" rx="16" fill="white"/>
+  <!-- Right weight -->
+  <rect x="356" y="196" width="36" height="120" rx="18" fill="white" opacity="0.95"/>
+  <rect x="384" y="216" width="32" height="80" rx="16" fill="white"/>
+  <!-- Lightning bolt accent -->
+  <text x="256" y="380" text-anchor="middle" font-size="60" fill="white" opacity="0.9">💪</text>
+</svg>

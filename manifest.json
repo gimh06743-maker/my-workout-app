@@ -1,0 +1,26 @@
+{
+  "name": "FitFlow - 운동 루틴 앱",
+  "short_name": "FitFlow",
+  "description": "나만의 운동 루틴을 만들고 기록하세요",
+  "start_url": "/my-workout-app/workout_app.html",
+  "scope": "/my-workout-app/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#c8dff5",
+  "theme_color": "#4a90d9",
+  "lang": "ko",
+  "icons": [
+    {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
