@@ -1,0 +1,1638 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FitFlow - 운동 루틴 앱</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #ddeeff;
+    --bg2: #c8dff5;
+    --card: rgba(255,255,255,0.72);
+    --card-border: rgba(255,255,255,0.9);
+    --text: #1a2a3a;
+    --text2: #5a7a9a;
+    --accent: #4a90d9;
+    --accent2: #6ab0f5;
+    --accent-light: rgba(74,144,217,0.15);
+    --red: #e05555;
+    --green: #4caf7d;
+    --orange: #f0a055;
+    --purple: #9b7fe8;
+    --radius: 20px;
+    --radius-sm: 12px;
+    --shadow: 0 8px 32px rgba(74,144,217,0.15);
+    --shadow-sm: 0 4px 16px rgba(74,144,217,0.1);
+    --tag-chest: #f0a055;
+    --tag-back: #4caf7d;
+    --tag-shoulder: #9b7fe8;
+    --tag-leg: #e05555;
+    --tag-arm: #4a90d9;
+    --tag-rest: #a0b8c8;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Noto Sans KR', sans-serif;
+    background: linear-gradient(135deg, #c8dff5 0%, #ddeeff 50%, #e8f4ff 100%);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+  }
+
+  /* Phone Frame */
+  .phone {
+    width: 390px;
+    min-height: 844px;
+    background: linear-gradient(160deg, #ddeeff 0%, #c8dff5 100%);
+    border-radius: 50px;
+    box-shadow: 0 40px 80px rgba(30,80,140,0.25), inset 0 1px 0 rgba(255,255,255,0.8);
+    overflow: hidden;
+    position: relative;
+    border: 2px solid rgba(255,255,255,0.7);
+  }
+
+  .status-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 14px 28px 8px;
+    font-family: 'Space Mono', monospace;
+    font-size: 12px;
+    color: var(--text);
+    font-weight: 700;
+  }
+
+  .status-icons { display: flex; gap: 6px; align-items: center; }
+  .status-icons span { font-size: 11px; }
+
+  /* Screens */
+  .screen { display: none; flex-direction: column; height: calc(844px - 40px); }
+  .screen.active { display: flex; }
+
+  /* Bottom Nav */
+  .bottom-nav {
+    display: flex;
+    background: var(--card);
+    backdrop-filter: blur(20px);
+    border-top: 1px solid var(--card-border);
+    padding: 12px 0 20px;
+    margin-top: auto;
+    flex-shrink: 0;
+  }
+  .nav-item {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    cursor: pointer;
+    transition: all 0.2s;
+    padding: 4px 0;
+  }
+  .nav-item .nav-icon { font-size: 22px; transition: transform 0.2s; }
+  .nav-item .nav-label { font-size: 10px; color: var(--text2); font-weight: 500; }
+  .nav-item.active .nav-label { color: var(--accent); }
+  .nav-item.active .nav-icon { transform: scale(1.15); }
+
+  /* Scrollable content */
+  .scroll-content {
+    flex: 1;
+    overflow-y: auto;
+    padding: 0 20px 16px;
+    scrollbar-width: none;
+  }
+  .scroll-content::-webkit-scrollbar { display: none; }
+
+  /* Page header */
+  .page-header {
+    padding: 16px 20px 0;
+    flex-shrink: 0;
+  }
+  .page-title {
+    font-size: 28px;
+    font-weight: 900;
+    color: var(--text);
+    letter-spacing: -0.5px;
+  }
+  .page-subtitle { font-size: 13px; color: var(--text2); margin-top: 2px; }
+
+  /* Cards */
+  .card {
+    background: var(--card);
+    backdrop-filter: blur(20px);
+    border: 1px solid var(--card-border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-sm);
+    overflow: hidden;
+  }
+
+  /* ===================== HOME SCREEN ===================== */
+  #home .page-header { padding-bottom: 12px; }
+
+  .stats-row {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 14px;
+  }
+  .stat-card {
+    flex: 1;
+    background: var(--card);
+    backdrop-filter: blur(20px);
+    border: 1px solid var(--card-border);
+    border-radius: var(--radius-sm);
+    padding: 14px 12px;
+    box-shadow: var(--shadow-sm);
+  }
+  .stat-label { font-size: 11px; color: var(--text2); font-weight: 500; margin-bottom: 4px; }
+  .stat-value { font-size: 24px; font-weight: 900; color: var(--text); font-family: 'Space Mono', monospace; }
+  .stat-icon { font-size: 18px; float: right; margin-top: -2px; }
+
+  .section-title {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .section-title a {
+    font-size: 12px;
+    color: var(--accent);
+    cursor: pointer;
+    font-weight: 500;
+  }
+
+  .routine-preview-card {
+    background: var(--card);
+    backdrop-filter: blur(20px);
+    border: 1px solid var(--card-border);
+    border-radius: var(--radius);
+    padding: 16px;
+    margin-bottom: 14px;
+    box-shadow: var(--shadow-sm);
+  }
+
+  .routine-preview-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 12px;
+  }
+  .routine-preview-name { font-size: 16px; font-weight: 700; color: var(--text); }
+  .routine-badge {
+    font-size: 10px;
+    padding: 3px 8px;
+    border-radius: 20px;
+    font-weight: 700;
+  }
+  .badge-beginner { background: rgba(76,175,125,0.15); color: var(--green); }
+  .badge-mid { background: rgba(74,144,217,0.15); color: var(--accent); }
+  .badge-adv { background: rgba(224,85,85,0.15); color: var(--red); }
+
+  .week-dots {
+    display: flex;
+    gap: 4px;
+  }
+  .week-dot {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 3px;
+  }
+  .week-dot .day-label { font-size: 9px; color: var(--text2); font-weight: 500; }
+  .week-dot .dot {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 9px;
+    font-weight: 700;
+    color: white;
+    transition: transform 0.2s;
+  }
+  .dot.chest { background: var(--tag-chest); }
+  .dot.back { background: var(--tag-back); }
+  .dot.shoulder { background: var(--tag-shoulder); }
+  .dot.leg { background: var(--tag-leg); }
+  .dot.arm { background: var(--tag-arm); }
+  .dot.rest { background: var(--tag-rest); }
+  .dot.upper { background: linear-gradient(135deg, var(--tag-chest), var(--tag-shoulder)); }
+
+  .today-card {
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    border-radius: var(--radius);
+    padding: 18px;
+    margin-bottom: 14px;
+    color: white;
+    box-shadow: 0 8px 24px rgba(74,144,217,0.3);
+  }
+  .today-label { font-size: 11px; opacity: 0.8; font-weight: 500; margin-bottom: 4px; }
+  .today-title { font-size: 18px; font-weight: 900; margin-bottom: 12px; }
+  .today-exercises { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 14px; }
+  .today-ex-chip {
+    background: rgba(255,255,255,0.2);
+    border-radius: 20px;
+    padding: 4px 10px;
+    font-size: 11px;
+    font-weight: 500;
+  }
+  .start-btn {
+    width: 100%;
+    background: white;
+    color: var(--accent);
+    border: none;
+    border-radius: var(--radius-sm);
+    padding: 12px;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    font-family: 'Noto Sans KR', sans-serif;
+    transition: transform 0.15s, box-shadow 0.15s;
+  }
+  .start-btn:hover { transform: scale(0.98); }
+
+  /* ===================== ROUTINES SCREEN ===================== */
+  .routine-list { display: flex; flex-direction: column; gap: 12px; }
+  .routine-card {
+    background: var(--card);
+    backdrop-filter: blur(20px);
+    border: 1.5px solid var(--card-border);
+    border-radius: var(--radius);
+    padding: 16px;
+    cursor: pointer;
+    box-shadow: var(--shadow-sm);
+    transition: transform 0.2s, box-shadow 0.2s;
+    position: relative;
+  }
+  .routine-card:hover { transform: translateY(-2px); box-shadow: var(--shadow); }
+  .routine-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+  }
+  .routine-card-name { font-size: 16px; font-weight: 700; color: var(--text); }
+  .routine-card-desc { font-size: 12px; color: var(--text2); margin-bottom: 12px; line-height: 1.5; }
+  .routine-days-mini {
+    display: flex;
+    gap: 4px;
+  }
+  .day-mini {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 9px;
+    font-weight: 700;
+    border: 1.5px solid;
+  }
+  .day-mini.has-workout {
+    background: var(--accent-light);
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+  .day-mini.rest-day {
+    background: rgba(160,184,200,0.1);
+    border-color: rgba(160,184,200,0.4);
+    color: var(--text2);
+  }
+
+  .add-routine-btn {
+    background: var(--card);
+    backdrop-filter: blur(20px);
+    border: 2px dashed rgba(74,144,217,0.4);
+    border-radius: var(--radius);
+    padding: 20px;
+    text-align: center;
+    cursor: pointer;
+    color: var(--accent);
+    font-size: 14px;
+    font-weight: 600;
+    transition: all 0.2s;
+    margin-top: 4px;
+  }
+  .add-routine-btn:hover { background: var(--accent-light); border-color: var(--accent); }
+  .add-routine-btn .plus { font-size: 28px; display: block; margin-bottom: 4px; }
+
+  /* ===================== ROUTINE DETAIL SCREEN ===================== */
+  .routine-detail-header {
+    padding: 16px 20px 0;
+    flex-shrink: 0;
+  }
+  .back-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    color: var(--accent);
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    margin-bottom: 8px;
+    background: none;
+    border: none;
+    font-family: 'Noto Sans KR', sans-serif;
+  }
+
+  .days-tab {
+    display: flex;
+    gap: 6px;
+    overflow-x: auto;
+    padding: 12px 20px;
+    flex-shrink: 0;
+    scrollbar-width: none;
+  }
+  .days-tab::-webkit-scrollbar { display: none; }
+  .day-tab {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    cursor: pointer;
+    flex-shrink: 0;
+    transition: all 0.2s;
+  }
+  .day-tab-label {
+    font-size: 10px;
+    font-weight: 600;
+    color: var(--text2);
+  }
+  .day-tab-circle {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 10px;
+    font-weight: 700;
+    border: 2px solid transparent;
+    transition: all 0.2s;
+    color: white;
+  }
+  .day-tab.active .day-tab-label { color: var(--accent); font-weight: 700; }
+  .day-tab.active .day-tab-circle {
+    box-shadow: 0 4px 12px rgba(74,144,217,0.35);
+    transform: scale(1.1);
+    border-color: rgba(255,255,255,0.5);
+  }
+  .day-tab:not(.active) .day-tab-circle {
+    background: rgba(160,184,200,0.3) !important;
+    color: var(--text2);
+  }
+
+  .workout-list-section { padding: 0 20px 12px; flex-shrink: 0; }
+  .workout-list-section .section-title { margin-bottom: 8px; }
+
+  .exercise-item {
+    background: var(--card);
+    backdrop-filter: blur(20px);
+    border: 1px solid var(--card-border);
+    border-radius: var(--radius-sm);
+    padding: 14px 16px;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    cursor: pointer;
+    box-shadow: var(--shadow-sm);
+    transition: all 0.2s;
+  }
+  .exercise-item:hover { transform: translateX(4px); box-shadow: var(--shadow); }
+  .exercise-emoji { font-size: 28px; flex-shrink: 0; }
+  .exercise-info { flex: 1; }
+  .exercise-name { font-size: 14px; font-weight: 700; color: var(--text); }
+  .exercise-sets { font-size: 12px; color: var(--text2); margin-top: 2px; }
+  .exercise-tag {
+    font-size: 10px;
+    padding: 2px 7px;
+    border-radius: 20px;
+    font-weight: 700;
+    flex-shrink: 0;
+  }
+  .exercise-chevron { color: var(--text2); font-size: 14px; flex-shrink: 0; }
+
+  .delete-btn-sm {
+    background: rgba(224,85,85,0.1);
+    border: none;
+    border-radius: 8px;
+    width: 28px;
+    height: 28px;
+    color: var(--red);
+    font-size: 14px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: background 0.2s;
+  }
+  .delete-btn-sm:hover { background: rgba(224,85,85,0.2); }
+
+  .add-exercise-area {
+    padding: 0 20px;
+    flex-shrink: 0;
+  }
+  .add-exercise-btn {
+    width: 100%;
+    background: var(--card);
+    backdrop-filter: blur(20px);
+    border: 2px dashed rgba(74,144,217,0.35);
+    border-radius: var(--radius-sm);
+    padding: 14px;
+    color: var(--accent);
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: 'Noto Sans KR', sans-serif;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    transition: all 0.2s;
+  }
+  .add-exercise-btn:hover { background: var(--accent-light); border-color: var(--accent); }
+
+  /* ===================== EXERCISE PICKER ===================== */
+  .category-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    padding: 0;
+  }
+  .category-card {
+    background: var(--card);
+    backdrop-filter: blur(20px);
+    border: 1.5px solid var(--card-border);
+    border-radius: var(--radius-sm);
+    padding: 16px 8px;
+    text-align: center;
+    cursor: pointer;
+    box-shadow: var(--shadow-sm);
+    transition: all 0.2s;
+  }
+  .category-card:hover { transform: scale(1.04); }
+  .category-icon { font-size: 28px; margin-bottom: 6px; }
+  .category-name { font-size: 12px; font-weight: 700; color: var(--text); }
+
+  .exercise-grid { display: flex; flex-direction: column; gap: 8px; }
+  .exercise-pick-item {
+    background: var(--card);
+    backdrop-filter: blur(20px);
+    border: 1.5px solid var(--card-border);
+    border-radius: var(--radius-sm);
+    padding: 12px 14px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    cursor: pointer;
+    box-shadow: var(--shadow-sm);
+    transition: all 0.2s;
+  }
+  .exercise-pick-item:hover { border-color: var(--accent); background: var(--accent-light); }
+  .pick-emoji { font-size: 24px; flex-shrink: 0; }
+  .pick-info { flex: 1; }
+  .pick-name { font-size: 13px; font-weight: 700; color: var(--text); }
+  .pick-muscle { font-size: 11px; color: var(--text2); }
+  .pick-add-btn {
+    background: var(--accent);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    width: 28px;
+    height: 28px;
+    font-size: 16px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: transform 0.15s;
+  }
+  .pick-add-btn:hover { transform: scale(1.1); }
+
+  /* ===================== EXERCISE DETAIL ===================== */
+  .exercise-hero {
+    margin: 0 20px 16px;
+    background: linear-gradient(135deg, rgba(74,144,217,0.15), rgba(106,176,245,0.1));
+    border: 1px solid rgba(74,144,217,0.2);
+    border-radius: var(--radius);
+    padding: 20px;
+    text-align: center;
+  }
+  .exercise-hero-icon { font-size: 56px; margin-bottom: 8px; }
+  .exercise-hero-name { font-size: 20px; font-weight: 900; color: var(--text); }
+  .exercise-tags { display: flex; justify-content: center; gap: 6px; margin-top: 8px; flex-wrap: wrap; }
+  .ex-tag {
+    font-size: 11px;
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-weight: 600;
+  }
+
+  .sets-editor {
+    margin: 0 20px 14px;
+    background: var(--card);
+    border: 1px solid var(--card-border);
+    border-radius: var(--radius);
+    padding: 16px;
+    box-shadow: var(--shadow-sm);
+  }
+  .sets-editor-title { font-size: 13px; font-weight: 700; color: var(--text); margin-bottom: 12px; }
+  .set-control {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 10px;
+  }
+  .set-label { font-size: 13px; color: var(--text2); font-weight: 500; }
+  .set-input-group { display: flex; align-items: center; gap: 8px; }
+  .set-btn {
+    width: 32px; height: 32px;
+    border-radius: 50%;
+    border: 1.5px solid var(--accent);
+    background: var(--accent-light);
+    color: var(--accent);
+    font-size: 18px;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: all 0.15s;
+    font-weight: 700;
+  }
+  .set-btn:hover { background: var(--accent); color: white; }
+  .set-value {
+    font-size: 18px;
+    font-weight: 900;
+    color: var(--text);
+    font-family: 'Space Mono', monospace;
+    min-width: 32px;
+    text-align: center;
+  }
+
+  .muscle-map {
+    margin: 0 20px 14px;
+    background: var(--card);
+    border: 1px solid var(--card-border);
+    border-radius: var(--radius);
+    padding: 16px;
+    box-shadow: var(--shadow-sm);
+  }
+  .muscle-title { font-size: 13px; font-weight: 700; color: var(--text); margin-bottom: 10px; }
+  .muscle-body {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+  }
+  .muscle-figure {
+    font-size: 60px;
+    text-align: center;
+    line-height: 1;
+  }
+  .muscle-desc { font-size: 12px; color: var(--text2); text-align: center; margin-top: 8px; line-height: 1.5; }
+
+  .video-link {
+    margin: 0 20px 14px;
+    background: linear-gradient(135deg, rgba(224,85,85,0.1), rgba(224,85,85,0.05));
+    border: 1px solid rgba(224,85,85,0.2);
+    border-radius: var(--radius-sm);
+    padding: 14px 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .video-link:hover { background: rgba(224,85,85,0.15); }
+  .yt-icon { font-size: 24px; color: #ff0000; }
+  .video-link-text { font-size: 13px; font-weight: 600; color: var(--text); }
+  .video-link-sub { font-size: 11px; color: var(--text2); }
+
+  /* ===================== MODALS ===================== */
+  .modal-overlay {
+    display: none;
+    position: absolute;
+    inset: 0;
+    background: rgba(10,30,60,0.4);
+    backdrop-filter: blur(4px);
+    z-index: 100;
+    align-items: flex-end;
+  }
+  .modal-overlay.active { display: flex; }
+
+  .modal-sheet {
+    width: 100%;
+    background: linear-gradient(160deg, #ddeeff 0%, #c8dff5 100%);
+    border-radius: 28px 28px 0 0;
+    padding: 20px;
+    max-height: 85%;
+    overflow-y: auto;
+    scrollbar-width: none;
+  }
+  .modal-sheet::-webkit-scrollbar { display: none; }
+  .modal-handle {
+    width: 40px;
+    height: 4px;
+    background: rgba(74,144,217,0.3);
+    border-radius: 2px;
+    margin: 0 auto 16px;
+  }
+  .modal-title {
+    font-size: 18px;
+    font-weight: 900;
+    color: var(--text);
+    margin-bottom: 16px;
+  }
+
+  /* Add Routine Modal */
+  .input-group { margin-bottom: 12px; }
+  .input-label { font-size: 12px; font-weight: 600; color: var(--text2); margin-bottom: 6px; }
+  .text-input {
+    width: 100%;
+    background: var(--card);
+    border: 1.5px solid var(--card-border);
+    border-radius: var(--radius-sm);
+    padding: 12px 14px;
+    font-size: 14px;
+    color: var(--text);
+    font-family: 'Noto Sans KR', sans-serif;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .text-input:focus { border-color: var(--accent); }
+
+  .level-selector { display: flex; gap: 8px; }
+  .level-btn {
+    flex: 1;
+    padding: 10px;
+    border-radius: var(--radius-sm);
+    border: 1.5px solid var(--card-border);
+    background: var(--card);
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    text-align: center;
+    transition: all 0.2s;
+    font-family: 'Noto Sans KR', sans-serif;
+    color: var(--text2);
+  }
+  .level-btn.active { border-color: var(--accent); background: var(--accent-light); color: var(--accent); }
+
+  .confirm-btn {
+    width: 100%;
+    background: var(--accent);
+    color: white;
+    border: none;
+    border-radius: var(--radius-sm);
+    padding: 14px;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    font-family: 'Noto Sans KR', sans-serif;
+    transition: all 0.2s;
+    margin-top: 8px;
+  }
+  .confirm-btn:hover { background: #3a7dc9; }
+
+  /* ===================== MISC ===================== */
+  .tag-chest { background: rgba(240,160,85,0.15); color: var(--tag-chest); }
+  .tag-back { background: rgba(76,175,125,0.15); color: var(--tag-back); }
+  .tag-shoulder { background: rgba(155,127,232,0.15); color: var(--tag-shoulder); }
+  .tag-leg { background: rgba(224,85,85,0.15); color: var(--tag-leg); }
+  .tag-arm { background: rgba(74,144,217,0.15); color: var(--tag-arm); }
+  .tag-rest { background: rgba(160,184,200,0.15); color: var(--tag-rest); }
+
+  .toast {
+    position: absolute;
+    top: 70px;
+    left: 50%;
+    transform: translateX(-50%) translateY(-20px);
+    background: rgba(30,60,100,0.9);
+    color: white;
+    padding: 10px 18px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+    white-space: nowrap;
+    opacity: 0;
+    transition: all 0.3s;
+    z-index: 200;
+    pointer-events: none;
+  }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+  .empty-state {
+    text-align: center;
+    padding: 30px 20px;
+    color: var(--text2);
+  }
+  .empty-icon { font-size: 40px; margin-bottom: 8px; }
+  .empty-text { font-size: 14px; font-weight: 500; }
+  .empty-sub { font-size: 12px; margin-top: 4px; }
+
+  .my-screen-content { padding: 20px; }
+  .profile-section {
+    background: var(--card);
+    border: 1px solid var(--card-border);
+    border-radius: var(--radius);
+    padding: 20px;
+    text-align: center;
+    margin-bottom: 16px;
+    box-shadow: var(--shadow-sm);
+  }
+  .profile-avatar { font-size: 52px; margin-bottom: 8px; }
+  .profile-name { font-size: 18px; font-weight: 700; color: var(--text); }
+  .profile-level { font-size: 12px; color: var(--text2); margin-top: 2px; }
+
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    margin-bottom: 16px;
+  }
+  .stat-mini {
+    background: var(--card);
+    border: 1px solid var(--card-border);
+    border-radius: var(--radius-sm);
+    padding: 14px 8px;
+    text-align: center;
+    box-shadow: var(--shadow-sm);
+  }
+  .stat-mini-val { font-size: 22px; font-weight: 900; color: var(--text); font-family: 'Space Mono', monospace; }
+  .stat-mini-label { font-size: 10px; color: var(--text2); margin-top: 2px; font-weight: 500; }
+
+  .settings-list { display: flex; flex-direction: column; gap: 8px; }
+  .settings-item {
+    background: var(--card);
+    border: 1px solid var(--card-border);
+    border-radius: var(--radius-sm);
+    padding: 14px 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: var(--shadow-sm);
+    cursor: pointer;
+  }
+  .settings-item-left { display: flex; align-items: center; gap: 10px; }
+  .settings-icon { font-size: 18px; }
+  .settings-label { font-size: 13px; font-weight: 600; color: var(--text); }
+  .settings-chevron { color: var(--text2); }
+
+  /* Editable title */
+  .editable-title {
+    font-size: 28px;
+    font-weight: 900;
+    color: var(--text);
+    border: none;
+    background: transparent;
+    font-family: 'Noto Sans KR', sans-serif;
+    width: 100%;
+    outline: none;
+    letter-spacing: -0.5px;
+    cursor: text;
+  }
+  .editable-title:focus {
+    border-bottom: 2px solid var(--accent);
+  }
+
+  /* Week tag under day tab */
+  .day-tab-tag { font-size: 8px; font-weight: 700; margin-top: 1px; }
+</style>
+</head>
+<body>
+
+<div class="phone" id="app">
+  <!-- Status Bar -->
+  <div class="status-bar">
+    <span>10:45</span>
+    <div class="status-icons">
+      <span>📶</span><span>🔋</span>
+    </div>
+  </div>
+
+  <!-- Toast notification -->
+  <div class="toast" id="toast"></div>
+
+  <!-- ===== HOME SCREEN ===== -->
+  <div class="screen active" id="home">
+    <div class="page-header">
+      <div class="page-title">FitFlow 💪</div>
+      <div class="page-subtitle">오늘도 파이팅!</div>
+    </div>
+    <div class="scroll-content" style="padding-top:14px;">
+
+      <!-- Stats row -->
+      <div class="stats-row">
+        <div class="stat-card">
+          <div class="stat-label">루틴 <span class="stat-icon">📋</span></div>
+          <div class="stat-value" id="home-routine-count">3</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">이번 주 <span class="stat-icon">🔥</span></div>
+          <div class="stat-value">5</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">연속 <span class="stat-icon">⚡</span></div>
+          <div class="stat-value">12</div>
+        </div>
+      </div>
+
+      <!-- Today's workout -->
+      <div class="today-card">
+        <div class="today-label">오늘의 운동 · 월요일</div>
+        <div class="today-title">🏋️ 가슴 & 삼두</div>
+        <div class="today-exercises">
+          <span class="today-ex-chip">벤치 프레스</span>
+          <span class="today-ex-chip">덤벨 플라이</span>
+          <span class="today-ex-chip">케이블 크로스오버</span>
+          <span class="today-ex-chip">+2 more</span>
+        </div>
+        <button class="start-btn" onclick="showToast('운동 시작! 💪')">운동 시작하기</button>
+      </div>
+
+      <!-- My Routines Preview -->
+      <div class="section-title">
+        내 루틴 <a onclick="switchTab('routines')">더보기 ›</a>
+      </div>
+
+      <div id="home-routine-preview"></div>
+
+    </div>
+
+    <div class="bottom-nav">
+      <div class="nav-item active" onclick="switchTab('home')"><span class="nav-icon">🏠</span><span class="nav-label">Home</span></div>
+      <div class="nav-item" onclick="switchTab('routines')"><span class="nav-icon">📋</span><span class="nav-label">Routines</span></div>
+      <div class="nav-item" onclick="switchTab('my')"><span class="nav-icon">👤</span><span class="nav-label">MY</span></div>
+    </div>
+  </div>
+
+  <!-- ===== ROUTINES SCREEN ===== -->
+  <div class="screen" id="routines">
+    <div class="page-header">
+      <div class="page-title">루틴</div>
+      <div class="page-subtitle">나만의 루틴을 만들어보세요</div>
+    </div>
+    <div class="scroll-content" style="padding-top:14px;">
+      <div class="routine-list" id="routine-list"></div>
+
+      <div class="add-routine-btn" onclick="openAddRoutineModal()">
+        <span class="plus">＋</span>
+        새 루틴 추가하기
+      </div>
+    </div>
+
+    <div class="bottom-nav">
+      <div class="nav-item" onclick="switchTab('home')"><span class="nav-icon">🏠</span><span class="nav-label">Home</span></div>
+      <div class="nav-item active" onclick="switchTab('routines')"><span class="nav-icon">📋</span><span class="nav-label">Routines</span></div>
+      <div class="nav-item" onclick="switchTab('my')"><span class="nav-icon">👤</span><span class="nav-label">MY</span></div>
+    </div>
+  </div>
+
+  <!-- ===== ROUTINE DETAIL SCREEN ===== -->
+  <div class="screen" id="routine-detail">
+    <div class="routine-detail-header">
+      <button class="back-btn" onclick="switchTab('routines')">‹ 루틴 목록</button>
+      <input class="editable-title" id="detail-routine-name" value="루틴 이름" />
+    </div>
+
+    <div class="days-tab" id="days-tab"></div>
+
+    <div class="scroll-content" style="padding-top:4px;">
+      <div id="exercise-list-container"></div>
+
+      <div class="add-exercise-area" style="padding:0;">
+        <button class="add-exercise-btn" onclick="openCategoryModal()">
+          ＋ 운동 추가하기
+        </button>
+      </div>
+    </div>
+
+    <div class="bottom-nav">
+      <div class="nav-item" onclick="switchTab('home')"><span class="nav-icon">🏠</span><span class="nav-label">Home</span></div>
+      <div class="nav-item active" onclick="switchTab('routines')"><span class="nav-icon">📋</span><span class="nav-label">Routines</span></div>
+      <div class="nav-item" onclick="switchTab('my')"><span class="nav-icon">👤</span><span class="nav-label">MY</span></div>
+    </div>
+  </div>
+
+  <!-- ===== EXERCISE PICKER SCREEN ===== -->
+  <div class="screen" id="exercise-picker">
+    <div class="page-header">
+      <button class="back-btn" id="picker-back-btn">‹ 뒤로</button>
+      <div class="page-title" id="picker-title">운동 선택</div>
+    </div>
+    <div class="scroll-content" style="padding-top:14px;">
+      <div id="picker-content"></div>
+    </div>
+
+    <div class="bottom-nav">
+      <div class="nav-item" onclick="switchTab('home')"><span class="nav-icon">🏠</span><span class="nav-label">Home</span></div>
+      <div class="nav-item active" onclick="switchTab('routines')"><span class="nav-icon">📋</span><span class="nav-label">Routines</span></div>
+      <div class="nav-item" onclick="switchTab('my')"><span class="nav-icon">👤</span><span class="nav-label">MY</span></div>
+    </div>
+  </div>
+
+  <!-- ===== EXERCISE DETAIL SCREEN ===== -->
+  <div class="screen" id="exercise-detail">
+    <div class="routine-detail-header">
+      <button class="back-btn" id="ex-detail-back">‹ 뒤로</button>
+    </div>
+    <div class="scroll-content" style="padding-top:4px;">
+      <div id="exercise-detail-content"></div>
+    </div>
+
+    <div class="bottom-nav">
+      <div class="nav-item" onclick="switchTab('home')"><span class="nav-icon">🏠</span><span class="nav-label">Home</span></div>
+      <div class="nav-item active" onclick="switchTab('routines')"><span class="nav-icon">📋</span><span class="nav-label">Routines</span></div>
+      <div class="nav-item" onclick="switchTab('my')"><span class="nav-icon">👤</span><span class="nav-label">MY</span></div>
+    </div>
+  </div>
+
+  <!-- ===== MY SCREEN ===== -->
+  <div class="screen" id="my">
+    <div class="page-header">
+      <div class="page-title">MY</div>
+    </div>
+    <div class="scroll-content my-screen-content" style="padding-left:0;padding-right:0;">
+      <div style="padding:0 20px 14px;">
+        <div class="profile-section">
+          <div class="profile-avatar">🧑‍💪</div>
+          <div class="profile-name">운동하는 사람</div>
+          <div class="profile-level">🔥 연속 12일째 운동 중!</div>
+        </div>
+
+        <div class="stats-grid">
+          <div class="stat-mini">
+            <div class="stat-mini-val">48</div>
+            <div class="stat-mini-label">총 운동 횟수</div>
+          </div>
+          <div class="stat-mini">
+            <div class="stat-mini-val" id="my-routine-count">3</div>
+            <div class="stat-mini-label">내 루틴</div>
+          </div>
+          <div class="stat-mini">
+            <div class="stat-mini-val">12</div>
+            <div class="stat-mini-label">연속 일수</div>
+          </div>
+        </div>
+
+        <div class="section-title" style="margin-bottom:10px;">설정</div>
+        <div class="settings-list">
+          <div class="settings-item" onclick="showToast('알림 설정 준비 중!')">
+            <div class="settings-item-left"><span class="settings-icon">🔔</span><span class="settings-label">운동 알림 설정</span></div>
+            <span class="settings-chevron">›</span>
+          </div>
+          <div class="settings-item" onclick="showToast('목표 설정 준비 중!')">
+            <div class="settings-item-left"><span class="settings-icon">🎯</span><span class="settings-label">목표 설정</span></div>
+            <span class="settings-chevron">›</span>
+          </div>
+          <div class="settings-item" onclick="showToast('공유 준비 중!')">
+            <div class="settings-item-left"><span class="settings-icon">📤</span><span class="settings-label">루틴 공유</span></div>
+            <span class="settings-chevron">›</span>
+          </div>
+          <div class="settings-item" onclick="showToast('앱 버전: v1.0.0')">
+            <div class="settings-item-left"><span class="settings-icon">ℹ️</span><span class="settings-label">앱 정보</span></div>
+            <span class="settings-chevron">›</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="bottom-nav">
+      <div class="nav-item" onclick="switchTab('home')"><span class="nav-icon">🏠</span><span class="nav-label">Home</span></div>
+      <div class="nav-item" onclick="switchTab('routines')"><span class="nav-icon">📋</span><span class="nav-label">Routines</span></div>
+      <div class="nav-item active" onclick="switchTab('my')"><span class="nav-icon">👤</span><span class="nav-label">MY</span></div>
+    </div>
+  </div>
+
+  <!-- ===== MODAL: Add Routine ===== -->
+  <div class="modal-overlay" id="modal-add-routine">
+    <div class="modal-sheet">
+      <div class="modal-handle"></div>
+      <div class="modal-title">새 루틴 만들기 ✨</div>
+
+      <div class="input-group">
+        <div class="input-label">루틴 이름</div>
+        <input class="text-input" id="new-routine-name" placeholder="예: 나만의 분할 루틴" />
+      </div>
+
+      <div class="input-group">
+        <div class="input-label">운동 레벨</div>
+        <div class="level-selector">
+          <div class="level-btn" onclick="selectLevel('beginner', this)">🌱 헬린이</div>
+          <div class="level-btn active" onclick="selectLevel('mid', this)">💪 중급자</div>
+          <div class="level-btn" onclick="selectLevel('adv', this)">🔥 헬창</div>
+        </div>
+      </div>
+
+      <div style="display:flex;gap:8px;">
+        <button class="confirm-btn" style="background:rgba(74,144,217,0.15);color:var(--accent);" onclick="closeModal('modal-add-routine')">취소</button>
+        <button class="confirm-btn" onclick="createRoutine()">루틴 생성</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== MODAL: Category Picker ===== -->
+  <div class="modal-overlay" id="modal-category">
+    <div class="modal-sheet">
+      <div class="modal-handle"></div>
+      <div class="modal-title">부위 선택 🎯</div>
+      <div class="category-grid">
+        <div class="category-card" onclick="showExercisePicker('가슴')">
+          <div class="category-icon">🫁</div>
+          <div class="category-name">가슴</div>
+        </div>
+        <div class="category-card" onclick="showExercisePicker('등')">
+          <div class="category-icon">🔙</div>
+          <div class="category-name">등</div>
+        </div>
+        <div class="category-card" onclick="showExercisePicker('어깨')">
+          <div class="category-icon">🤷</div>
+          <div class="category-name">어깨</div>
+        </div>
+        <div class="category-card" onclick="showExercisePicker('하체')">
+          <div class="category-icon">🦵</div>
+          <div class="category-name">하체</div>
+        </div>
+        <div class="category-card" onclick="showExercisePicker('팔')">
+          <div class="category-icon">💪</div>
+          <div class="category-name">팔</div>
+        </div>
+        <div class="category-card" onclick="showExercisePicker('복근')">
+          <div class="category-icon">🧱</div>
+          <div class="category-name">복근</div>
+        </div>
+      </div>
+      <button class="confirm-btn" style="background:rgba(74,144,217,0.15);color:var(--accent);margin-top:12px;" onclick="closeModal('modal-category')">취소</button>
+    </div>
+  </div>
+
+</div>
+
+<script>
+// ======================== DATA ========================
+const DAYS = ['월','화','수','목','금','토','일'];
+
+const EXERCISES_DB = {
+  '가슴': [
+    { id:'chest1', name:'벤치 프레스', emoji:'🏋️', muscle:'대흉근, 전면 삼각근, 삼두', desc:'가슴 운동의 왕. 바벨로 가슴 전체를 자극합니다.', category:'가슴', tag:'chest' },
+    { id:'chest2', name:'덤벨 플라이', emoji:'🦋', muscle:'대흉근 (안쪽)', desc:'가슴 안쪽을 집중적으로 자극하는 스트레치 운동.', category:'가슴', tag:'chest' },
+    { id:'chest3', name:'인클라인 벤치 프레스', emoji:'📐', muscle:'상부 대흉근', desc:'상부 가슴을 집중 공략하는 변형 벤치프레스.', category:'가슴', tag:'chest' },
+    { id:'chest4', name:'케이블 크로스오버', emoji:'🔗', muscle:'대흉근 전체', desc:'케이블로 가슴 전체를 고르게 자극합니다.', category:'가슴', tag:'chest' },
+    { id:'chest5', name:'체스트 프레스 (머신)', emoji:'🖥️', muscle:'대흉근', desc:'머신으로 안전하게 가슴을 자극하는 기초 운동.', category:'가슴', tag:'chest' },
+    { id:'chest6', name:'팩덱 플라이', emoji:'🦚', muscle:'대흉근 내측', desc:'가슴 내측 선명도를 높여주는 머신 운동.', category:'가슴', tag:'chest' },
+  ],
+  '등': [
+    { id:'back1', name:'풀업', emoji:'🆙', muscle:'광배근, 이두', desc:'자체 중량을 이용한 최고의 등 운동.', category:'등', tag:'back' },
+    { id:'back2', name:'바벨 로우', emoji:'🔩', muscle:'광배근, 능형근', desc:'등의 두께를 만들어주는 핵심 운동.', category:'등', tag:'back' },
+    { id:'back3', name:'랫 풀다운', emoji:'⬇️', muscle:'광배근', desc:'광배근을 넓게 만들어주는 케이블 운동.', category:'등', tag:'back' },
+    { id:'back4', name:'시티드 로우', emoji:'🪑', muscle:'중부 등근육', desc:'앉아서 등 중앙을 자극하는 케이블 운동.', category:'등', tag:'back' },
+    { id:'back5', name:'데드리프트', emoji:'⚡', muscle:'전신 (등, 하체, 코어)', desc:'전신 근력을 향상시키는 복합 운동의 왕.', category:'등', tag:'back' },
+  ],
+  '어깨': [
+    { id:'sh1', name:'숄더 프레스', emoji:'🏔️', muscle:'전면·측면 삼각근', desc:'어깨 전체 볼륨을 키우는 핵심 운동.', category:'어깨', tag:'shoulder' },
+    { id:'sh2', name:'사이드 레터럴 레이즈', emoji:'↔️', muscle:'측면 삼각근', desc:'어깨 너비를 넓혀주는 고립 운동.', category:'어깨', tag:'shoulder' },
+    { id:'sh3', name:'프론트 레이즈', emoji:'⬆️', muscle:'전면 삼각근', desc:'어깨 앞쪽을 자극하는 운동.', category:'어깨', tag:'shoulder' },
+    { id:'sh4', name:'페이스 풀', emoji:'😤', muscle:'후면 삼각근, 회전근개', desc:'어깨 뒤쪽과 회전근개를 강화합니다.', category:'어깨', tag:'shoulder' },
+    { id:'sh5', name:'업라이트 로우', emoji:'🔺', muscle:'삼각근, 승모근', desc:'어깨와 승모근을 동시에 자극합니다.', category:'어깨', tag:'shoulder' },
+  ],
+  '하체': [
+    { id:'leg1', name:'스쿼트', emoji:'🦴', muscle:'대퇴사두, 둔근', desc:'하체 운동의 왕. 전체 하체를 자극합니다.', category:'하체', tag:'leg' },
+    { id:'leg2', name:'레그 프레스', emoji:'🖱️', muscle:'대퇴사두, 둔근', desc:'머신으로 안전하게 하체를 자극합니다.', category:'하체', tag:'leg' },
+    { id:'leg3', name:'런지', emoji:'🚶', muscle:'대퇴사두, 둔근', desc:'균형감과 하체 근력을 동시에 키웁니다.', category:'하체', tag:'leg' },
+    { id:'leg4', name:'레그 컬', emoji:'🦿', muscle:'햄스트링', desc:'허벅지 뒤쪽 햄스트링을 집중 자극합니다.', category:'하체', tag:'leg' },
+    { id:'leg5', name:'카프 레이즈', emoji:'🩰', muscle:'종아리 (비복근)', desc:'종아리를 자극하는 고립 운동.', category:'하체', tag:'leg' },
+    { id:'leg6', name:'힙 쓰러스트', emoji:'🍑', muscle:'대둔근', desc:'힙업의 최강 운동. 둔근을 집중 자극합니다.', category:'하체', tag:'leg' },
+  ],
+  '팔': [
+    { id:'arm1', name:'바벨 컬', emoji:'💪', muscle:'이두근', desc:'이두근을 키우는 기본 컬 운동.', category:'팔', tag:'arm' },
+    { id:'arm2', name:'해머 컬', emoji:'🔨', muscle:'이두근, 완요골근', desc:'이두 외측과 팔 두께를 만드는 운동.', category:'팔', tag:'arm' },
+    { id:'arm3', name:'트라이셉 푸시다운', emoji:'⬇️', muscle:'삼두근', desc:'케이블로 삼두를 집중 고립합니다.', category:'팔', tag:'arm' },
+    { id:'arm4', name:'스컬 크러셔', emoji:'💀', muscle:'삼두근', desc:'삼두 롱헤드를 집중 공략하는 운동.', category:'팔', tag:'arm' },
+    { id:'arm5', name:'딥스', emoji:'⬇️', muscle:'삼두, 가슴', desc:'체중으로 삼두와 가슴 하부를 자극합니다.', category:'팔', tag:'arm' },
+  ],
+  '복근': [
+    { id:'abs1', name:'크런치', emoji:'🔄', muscle:'복직근', desc:'복근의 기본 중의 기본 운동.', category:'복근', tag:'arm' },
+    { id:'abs2', name:'플랭크', emoji:'🧱', muscle:'코어 전체', desc:'전신 코어 안정성을 키웁니다.', category:'복근', tag:'arm' },
+    { id:'abs3', name:'레그 레이즈', emoji:'🦵', muscle:'하복부', desc:'하복부를 집중 자극하는 운동.', category:'복근', tag:'arm' },
+    { id:'abs4', name:'케이블 크런치', emoji:'⚙️', muscle:'복직근', desc:'케이블로 저항을 추가한 복근 운동.', category:'복근', tag:'arm' },
+  ],
+};
+
+const TAG_COLORS = {
+  chest: 'tag-chest', back: 'tag-back', shoulder: 'tag-shoulder',
+  leg: 'tag-leg', arm: 'tag-arm', rest: 'tag-rest'
+};
+const CATEGORY_TAGS = {
+  '가슴': 'chest', '등': 'back', '어깨': 'shoulder',
+  '하체': 'leg', '팔': 'arm', '복근': 'arm', 'REST': 'rest'
+};
+const DAY_TAG_LABELS = {
+  chest: '가슴', back: '등', shoulder: '어깨', leg: '하체', arm: '팔', rest: 'REST'
+};
+
+// ======================== STATE ========================
+let routines = [
+  {
+    id: 'r1',
+    name: '헬린이 루틴',
+    level: 'beginner',
+    days: {
+      '월': [
+        { ...EXERCISES_DB['가슴'][4], reps: 15, sets: 4 },
+        { ...EXERCISES_DB['가슴'][0], reps: 12, sets: 3 },
+        { ...EXERCISES_DB['가슴'][1], reps: 12, sets: 3 },
+      ],
+      '화': [
+        { ...EXERCISES_DB['등'][2], reps: 12, sets: 4 },
+        { ...EXERCISES_DB['등'][3], reps: 12, sets: 3 },
+      ],
+      '수': [],
+      '목': [
+        { ...EXERCISES_DB['어깨'][0], reps: 12, sets: 4 },
+        { ...EXERCISES_DB['어깨'][1], reps: 15, sets: 3 },
+      ],
+      '금': [
+        { ...EXERCISES_DB['하체'][0], reps: 10, sets: 5 },
+        { ...EXERCISES_DB['하체'][1], reps: 12, sets: 4 },
+      ],
+      '토': [
+        { ...EXERCISES_DB['팔'][0], reps: 12, sets: 3 },
+        { ...EXERCISES_DB['팔'][2], reps: 12, sets: 3 },
+      ],
+      '일': [],
+    }
+  },
+  {
+    id: 'r2',
+    name: '중급자 분할 루틴',
+    level: 'mid',
+    days: {
+      '월': [
+        { ...EXERCISES_DB['가슴'][0], reps: 8, sets: 5 },
+        { ...EXERCISES_DB['가슴'][2], reps: 10, sets: 4 },
+        { ...EXERCISES_DB['가슴'][3], reps: 12, sets: 3 },
+      ],
+      '화': [
+        { ...EXERCISES_DB['등'][4], reps: 5, sets: 5 },
+        { ...EXERCISES_DB['등'][0], reps: 8, sets: 4 },
+        { ...EXERCISES_DB['등'][1], reps: 10, sets: 4 },
+      ],
+      '수': [],
+      '목': [
+        { ...EXERCISES_DB['어깨'][0], reps: 10, sets: 4 },
+        { ...EXERCISES_DB['어깨'][1], reps: 15, sets: 4 },
+        { ...EXERCISES_DB['어깨'][3], reps: 15, sets: 3 },
+      ],
+      '금': [
+        { ...EXERCISES_DB['하체'][0], reps: 8, sets: 5 },
+        { ...EXERCISES_DB['하체'][5], reps: 12, sets: 4 },
+        { ...EXERCISES_DB['하체'][3], reps: 12, sets: 3 },
+      ],
+      '토': [
+        { ...EXERCISES_DB['팔'][0], reps: 10, sets: 4 },
+        { ...EXERCISES_DB['팔'][2], reps: 12, sets: 4 },
+        { ...EXERCISES_DB['복근'][1], reps: 60, sets: 3 },
+      ],
+      '일': [],
+    }
+  },
+  {
+    id: 'r3',
+    name: '헬창 6일 분할',
+    level: 'adv',
+    days: {
+      '월': [
+        { ...EXERCISES_DB['가슴'][0], reps: 5, sets: 5 },
+        { ...EXERCISES_DB['가슴'][2], reps: 8, sets: 4 },
+        { ...EXERCISES_DB['가슴'][3], reps: 12, sets: 3 },
+        { ...EXERCISES_DB['가슴'][5], reps: 15, sets: 3 },
+      ],
+      '화': [
+        { ...EXERCISES_DB['등'][4], reps: 5, sets: 5 },
+        { ...EXERCISES_DB['등'][0], reps: 8, sets: 5 },
+        { ...EXERCISES_DB['등'][1], reps: 8, sets: 4 },
+        { ...EXERCISES_DB['등'][3], reps: 12, sets: 3 },
+      ],
+      '수': [
+        { ...EXERCISES_DB['어깨'][0], reps: 8, sets: 5 },
+        { ...EXERCISES_DB['어깨'][1], reps: 15, sets: 5 },
+        { ...EXERCISES_DB['어깨'][3], reps: 15, sets: 4 },
+        { ...EXERCISES_DB['어깨'][4], reps: 12, sets: 3 },
+      ],
+      '목': [
+        { ...EXERCISES_DB['하체'][0], reps: 5, sets: 5 },
+        { ...EXERCISES_DB['하체'][5], reps: 10, sets: 5 },
+        { ...EXERCISES_DB['하체'][3], reps: 12, sets: 4 },
+        { ...EXERCISES_DB['하체'][4], reps: 20, sets: 4 },
+      ],
+      '금': [
+        { ...EXERCISES_DB['팔'][0], reps: 10, sets: 4 },
+        { ...EXERCISES_DB['팔'][1], reps: 10, sets: 4 },
+        { ...EXERCISES_DB['팔'][2], reps: 12, sets: 4 },
+        { ...EXERCISES_DB['팔'][3], reps: 12, sets: 4 },
+      ],
+      '토': [
+        { ...EXERCISES_DB['복근'][0], reps: 20, sets: 4 },
+        { ...EXERCISES_DB['복근'][1], reps: 60, sets: 4 },
+        { ...EXERCISES_DB['복근'][2], reps: 15, sets: 4 },
+        { ...EXERCISES_DB['복근'][3], reps: 15, sets: 3 },
+      ],
+      '일': [],
+    }
+  }
+];
+
+let currentRoutineId = null;
+let currentDay = '월';
+let pickerMode = 'categories'; // 'categories' | 'exercises'
+let currentCategory = null;
+let currentExerciseDetail = null;
+let backFromPicker = 'routine-detail';
+let selectedLevel = 'mid';
+
+// ======================== UTILS ========================
+function getDayTag(dayExercises) {
+  if (!dayExercises || dayExercises.length === 0) return 'rest';
+  const counts = {};
+  dayExercises.forEach(ex => {
+    counts[ex.tag] = (counts[ex.tag] || 0) + 1;
+  });
+  const total = dayExercises.length;
+  for (const [tag, count] of Object.entries(counts)) {
+    if (count / total >= 2/3) {
+      // If all upper body
+      if (['chest','back','shoulder'].includes(tag)) {
+        // Check if specific tag dominates
+        return tag;
+      }
+      return tag;
+    }
+  }
+  // Check if upper body (chest+back+shoulder) together > 2/3
+  const upper = (counts['chest']||0) + (counts['back']||0) + (counts['shoulder']||0);
+  if (upper / total >= 2/3) return 'chest'; // use generic 'upper' vibe
+  return Object.entries(counts).sort((a,b)=>b[1]-a[1])[0][0];
+}
+
+function getDotBg(tag) {
+  const map = { chest:'var(--tag-chest)',back:'var(--tag-back)',shoulder:'var(--tag-shoulder)',leg:'var(--tag-leg)',arm:'var(--tag-arm)',rest:'var(--tag-rest)' };
+  return map[tag] || 'var(--tag-rest)';
+}
+
+function getLevelBadge(level) {
+  const m = { beginner: ['badge-beginner','🌱 헬린이'], mid: ['badge-mid','💪 중급자'], adv: ['badge-adv','🔥 헬창'] };
+  return m[level] || m.mid;
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2200);
+}
+
+// ======================== NAVIGATION ========================
+function switchTab(tab) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(tab).classList.add('active');
+
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+
+  if (tab === 'home') {
+    document.querySelectorAll('.nav-item')[0].classList.add('active');
+    renderHome();
+  } else if (tab === 'routines') {
+    document.querySelectorAll('.nav-item')[1].classList.add('active');
+    renderRoutineList();
+  } else if (tab === 'my') {
+    document.querySelectorAll('.nav-item')[2].classList.add('active');
+    document.getElementById('my-routine-count').textContent = routines.length;
+  } else if (tab === 'routine-detail') {
+    document.querySelectorAll('.nav-item')[1].classList.add('active');
+    renderRoutineDetail();
+  } else if (tab === 'exercise-picker') {
+    document.querySelectorAll('.nav-item')[1].classList.add('active');
+  } else if (tab === 'exercise-detail') {
+    document.querySelectorAll('.nav-item')[1].classList.add('active');
+  }
+}
+
+// ======================== HOME ========================
+function renderHome() {
+  document.getElementById('home-routine-count').textContent = routines.length;
+  const container = document.getElementById('home-routine-preview');
+  if (routines.length === 0) {
+    container.innerHTML = `<div class="empty-state"><div class="empty-icon">📋</div><div class="empty-text">아직 루틴이 없어요</div><div class="empty-sub">루틴 탭에서 만들어보세요!</div></div>`;
+    return;
+  }
+  const r = routines[0];
+  const [badgeClass, badgeText] = getLevelBadge(r.level);
+  const dots = DAYS.map(d => {
+    const tag = getDayTag(r.days[d]);
+    const label = tag === 'rest' ? 'REST' : DAY_TAG_LABELS[tag] || '';
+    return `<div class="week-dot"><div class="day-label">${d}</div><div class="dot ${tag}" title="${label}">${tag === 'rest' ? '😴' : label.slice(0,2)}</div></div>`;
+  }).join('');
+  container.innerHTML = `
+    <div class="routine-preview-card" onclick="openRoutineDetail('${r.id}')">
+      <div class="routine-preview-header">
+        <div class="routine-preview-name">${r.name}</div>
+        <span class="routine-badge ${badgeClass}">${badgeText}</span>
+      </div>
+      <div class="week-dots">${dots}</div>
+    </div>`;
+}
+
+// ======================== ROUTINE LIST ========================
+function renderRoutineList() {
+  const list = document.getElementById('routine-list');
+  list.innerHTML = routines.map(r => {
+    const [badgeClass, badgeText] = getLevelBadge(r.level);
+    const days = DAYS.map(d => {
+      const hasWork = r.days[d] && r.days[d].length > 0;
+      return `<div class="day-mini ${hasWork ? 'has-workout' : 'rest-day'}">${d}</div>`;
+    }).join('');
+    return `
+      <div class="routine-card" onclick="openRoutineDetail('${r.id}')">
+        <div class="routine-card-header">
+          <div class="routine-card-name">${r.name}</div>
+          <span class="routine-badge ${badgeClass}">${badgeText}</span>
+        </div>
+        <div class="routine-card-desc">${r.days ? Object.values(r.days).filter(d=>d.length>0).length : 0}일/주 운동 · ${Object.values(r.days||{}).flat().length}개 운동</div>
+        <div class="routine-days-mini">${days}</div>
+      </div>`;
+  }).join('');
+}
+
+// ======================== ROUTINE DETAIL ========================
+function openRoutineDetail(id) {
+  currentRoutineId = id;
+  currentDay = '월';
+  switchTab('routine-detail');
+}
+
+function renderRoutineDetail() {
+  const r = routines.find(x => x.id === currentRoutineId);
+  if (!r) return;
+
+  // Title
+  const titleInput = document.getElementById('detail-routine-name');
+  titleInput.value = r.name;
+  titleInput.oninput = () => { r.name = titleInput.value; };
+
+  // Days tabs
+  const daysTab = document.getElementById('days-tab');
+  daysTab.innerHTML = DAYS.map(d => {
+    const tag = getDayTag(r.days[d]);
+    const dotBg = getDotBg(tag);
+    const label = tag === 'rest' ? '😴' : DAY_TAG_LABELS[tag]?.slice(0,2) || '';
+    return `
+      <div class="day-tab ${d === currentDay ? 'active' : ''}" onclick="selectDay('${d}')">
+        <div class="day-label">${d}</div>
+        <div class="day-tab-circle" style="background:${dotBg};">${r.days[d].length > 0 ? label : '😴'}</div>
+      </div>`;
+  }).join('');
+
+  renderExerciseList(r);
+}
+
+function selectDay(day) {
+  currentDay = day;
+  renderRoutineDetail();
+}
+
+function renderExerciseList(r) {
+  const container = document.getElementById('exercise-list-container');
+  const exercises = r.days[currentDay] || [];
+
+  if (exercises.length === 0) {
+    container.innerHTML = `<div class="empty-state"><div class="empty-icon">😴</div><div class="empty-text">오늘은 휴식일</div><div class="empty-sub">운동을 추가해 활성화하세요</div></div>`;
+    return;
+  }
+
+  container.innerHTML = exercises.map((ex, i) => {
+    const tagClass = TAG_COLORS[ex.tag] || 'tag-rest';
+    return `
+      <div class="exercise-item">
+        <div class="exercise-emoji" onclick="openExerciseDetail('${ex.id}', ${i})">${ex.emoji}</div>
+        <div class="exercise-info" onclick="openExerciseDetail('${ex.id}', ${i})">
+          <div class="exercise-name">${ex.name}</div>
+          <div class="exercise-sets">${ex.reps}회 × ${ex.sets}세트</div>
+        </div>
+        <span class="exercise-tag ${tagClass}">${DAY_TAG_LABELS[ex.tag] || ex.tag}</span>
+        <button class="delete-btn-sm" onclick="deleteExercise(${i})">✕</button>
+      </div>`;
+  }).join('');
+}
+
+function deleteExercise(idx) {
+  const r = routines.find(x => x.id === currentRoutineId);
+  r.days[currentDay].splice(idx, 1);
+  renderRoutineDetail();
+  showToast('운동이 삭제되었습니다');
+}
+
+// ======================== EXERCISE DETAIL ========================
+function openExerciseDetail(exId, idx) {
+  // Find exercise in DB
+  let exercise = null;
+  for (const cat of Object.values(EXERCISES_DB)) {
+    const found = cat.find(e => e.id === exId);
+    if (found) { exercise = found; break; }
+  }
+  if (!exercise) return;
+
+  const r = routines.find(x => x.id === currentRoutineId);
+  const exInRoutine = r?.days[currentDay]?.[idx] || { reps: 12, sets: 3 };
+
+  currentExerciseDetail = { exId, idx, reps: exInRoutine.reps, sets: exInRoutine.sets };
+
+  const tagClass = TAG_COLORS[exercise.tag] || 'tag-rest';
+  const tagLabel = DAY_TAG_LABELS[exercise.tag] || exercise.tag;
+
+  document.getElementById('exercise-detail-content').innerHTML = `
+    <div class="exercise-hero">
+      <div class="exercise-hero-icon">${exercise.emoji}</div>
+      <div class="exercise-hero-name">${exercise.name}</div>
+      <div class="exercise-tags">
+        <span class="ex-tag ${tagClass}">${tagLabel}</span>
+        <span class="ex-tag" style="background:rgba(74,144,217,0.1);color:var(--accent);">${exercise.category}</span>
+      </div>
+    </div>
+
+    <div class="sets-editor">
+      <div class="sets-editor-title">📊 세트 & 횟수 설정</div>
+      <div class="set-control">
+        <span class="set-label">횟수 (Reps)</span>
+        <div class="set-input-group">
+          <button class="set-btn" onclick="adjustValue('reps',-1)">−</button>
+          <span class="set-value" id="val-reps">${exInRoutine.reps}</span>
+          <button class="set-btn" onclick="adjustValue('reps',1)">＋</button>
+        </div>
+      </div>
+      <div class="set-control">
+        <span class="set-label">세트 (Sets)</span>
+        <div class="set-input-group">
+          <button class="set-btn" onclick="adjustValue('sets',-1)">−</button>
+          <span class="set-value" id="val-sets">${exInRoutine.sets}</span>
+          <button class="set-btn" onclick="adjustValue('sets',1)">＋</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="muscle-map">
+      <div class="muscle-title">🎯 자극 부위</div>
+      <div style="text-align:center; font-size:52px; margin-bottom:8px;">${exercise.emoji}</div>
+      <div class="muscle-desc">${exercise.muscle}</div>
+      <div style="margin-top:10px;font-size:12px;color:var(--text2);line-height:1.6;">${exercise.desc}</div>
+    </div>
+
+    <div class="video-link" onclick="showToast('유튜브에서 검색 중... 🎬')">
+      <span class="yt-icon">▶️</span>
+      <div>
+        <div class="video-link-text">${exercise.name} 영상 보기</div>
+        <div class="video-link-sub">유튜브에서 운동 방법 확인</div>
+      </div>
+    </div>`;
+
+  document.getElementById('ex-detail-back').onclick = () => switchTab('routine-detail');
+  switchTab('exercise-detail');
+}
+
+function adjustValue(type, delta) {
+  const el = document.getElementById(`val-${type}`);
+  let val = parseInt(el.textContent) + delta;
+  if (type === 'reps') val = Math.max(1, Math.min(100, val));
+  if (type === 'sets') val = Math.max(1, Math.min(20, val));
+  el.textContent = val;
+  currentExerciseDetail[type] = val;
+
+  // Update in routine
+  const r = routines.find(x => x.id === currentRoutineId);
+  if (r && r.days[currentDay] && r.days[currentDay][currentExerciseDetail.idx]) {
+    r.days[currentDay][currentExerciseDetail.idx][type] = val;
+  }
+}
+
+// ======================== EXERCISE PICKER ========================
+function openCategoryModal() {
+  document.getElementById('modal-category').classList.add('active');
+}
+
+function showExercisePicker(category) {
+  currentCategory = category;
+  closeModal('modal-category');
+  pickerMode = 'exercises';
+
+  document.getElementById('picker-title').textContent = `${category} 운동`;
+  document.getElementById('picker-back-btn').onclick = () => switchTab('routine-detail');
+
+  const exercises = EXERCISES_DB[category] || [];
+  const r = routines.find(x => x.id === currentRoutineId);
+  const dayExercises = r?.days[currentDay] || [];
+
+  document.getElementById('picker-content').innerHTML = `
+    <div class="exercise-grid">
+      ${exercises.map(ex => {
+        const alreadyAdded = dayExercises.some(e => e.id === ex.id);
+        const tagClass = TAG_COLORS[ex.tag] || '';
+        return `
+          <div class="exercise-pick-item">
+            <span class="pick-emoji">${ex.emoji}</span>
+            <div class="pick-info">
+              <div class="pick-name">${ex.name}</div>
+              <div class="pick-muscle">${ex.muscle}</div>
+            </div>
+            <button class="pick-add-btn" 
+              style="${alreadyAdded ? 'background:var(--green);' : ''}"
+              onclick="addExerciseToRoutine('${ex.id}', this)">
+              ${alreadyAdded ? '✓' : '+'}
+            </button>
+          </div>`;
+      }).join('')}
+    </div>`;
+
+  switchTab('exercise-picker');
+}
+
+function addExerciseToRoutine(exId, btn) {
+  const r = routines.find(x => x.id === currentRoutineId);
+  const dayExercises = r.days[currentDay];
+  const alreadyAdded = dayExercises.some(e => e.id === exId);
+
+  if (alreadyAdded) {
+    showToast('이미 루틴에 추가된 운동입니다! ✅');
+    return;
+  }
+
+  let exercise = null;
+  for (const cat of Object.values(EXERCISES_DB)) {
+    const found = cat.find(e => e.id === exId);
+    if (found) { exercise = found; break; }
+  }
+  if (!exercise) return;
+
+  dayExercises.push({ ...exercise, reps: 12, sets: 3 });
+  btn.textContent = '✓';
+  btn.style.background = 'var(--green)';
+  showToast(`${exercise.name} 추가됨! 💪`);
+}
+
+// ======================== ADD ROUTINE MODAL ========================
+function openAddRoutineModal() {
+  document.getElementById('new-routine-name').value = '';
+  selectedLevel = 'mid';
+  document.querySelectorAll('.level-btn').forEach((b,i) => {
+    b.classList.toggle('active', i === 1);
+  });
+  document.getElementById('modal-add-routine').classList.add('active');
+}
+
+function selectLevel(level, btn) {
+  selectedLevel = level;
+  document.querySelectorAll('.level-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+}
+
+function createRoutine() {
+  const name = document.getElementById('new-routine-name').value.trim();
+  if (!name) { showToast('루틴 이름을 입력해주세요!'); return; }
+
+  const newRoutine = {
+    id: 'r' + Date.now(),
+    name,
+    level: selectedLevel,
+    days: { '월': [], '화': [], '수': [], '목': [], '금': [], '토': [], '일': [] }
+  };
+  routines.push(newRoutine);
+  closeModal('modal-add-routine');
+  showToast(`"${name}" 루틴이 생성됐어요! 🎉`);
+  renderRoutineList();
+  document.getElementById('home-routine-count').textContent = routines.length;
+}
+
+// ======================== MODALS ========================
+function closeModal(id) {
+  document.getElementById(id).classList.remove('active');
+}
+
+document.querySelectorAll('.modal-overlay').forEach(overlay => {
+  overlay.addEventListener('click', function(e) {
+    if (e.target === this) this.classList.remove('active');
+  });
+});
+
+// ======================== INIT ========================
+renderHome();
+renderRoutineList();
+</script>
+</body>
+</html>
