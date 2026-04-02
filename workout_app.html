@@ -26,13 +26,17 @@
   --tag-chest:#f0a055;--tag-back:#4caf7d;--tag-shoulder:#9b7fe8;--tag-leg:#e05555;--tag-arm:#4a90d9;--tag-rest:#a0b8c8;
 }
 *{box-sizing:border-box;margin:0;padding:0;}
-body{font-family:'Noto Sans KR',sans-serif;background:linear-gradient(135deg,#c8dff5 0%,#ddeeff 50%,#e8f4ff 100%);min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;}
-.phone{width:390px;min-height:844px;background:linear-gradient(160deg,#ddeeff 0%,#c8dff5 100%);border-radius:50px;box-shadow:0 40px 80px rgba(30,80,140,0.25),inset 0 1px 0 rgba(255,255,255,0.8);overflow:hidden;position:relative;border:2px solid rgba(255,255,255,0.7);}
-.status-bar{display:flex;justify-content:space-between;align-items:center;padding:14px 28px 8px;font-family:'Space Mono',monospace;font-size:12px;color:var(--text);font-weight:700;}
-.status-icons{display:flex;gap:6px;align-items:center;}
-.screen{display:none;flex-direction:column;height:calc(844px - 40px);}
+html,body{height:100%;width:100%;overflow:hidden;}
+body{font-family:'Noto Sans KR',sans-serif;background:linear-gradient(135deg,#c8dff5 0%,#ddeeff 50%,#e8f4ff 100%);}
+.phone{width:100%;height:100vh;height:100dvh;background:linear-gradient(160deg,#ddeeff 0%,#c8dff5 100%);overflow:hidden;position:relative;display:flex;flex-direction:column;}
+/* PC에서는 폰 프레임처럼 보이게 */
+@media(min-width:500px){
+  body{display:flex;align-items:center;justify-content:center;}
+  .phone{width:390px;height:844px;border-radius:50px;box-shadow:0 40px 80px rgba(30,80,140,0.25),inset 0 1px 0 rgba(255,255,255,0.8);border:2px solid rgba(255,255,255,0.7);}
+}
+.screen{display:none;flex-direction:column;flex:1;overflow:hidden;}
 .screen.active{display:flex;}
-.bottom-nav{display:flex;background:var(--card);backdrop-filter:blur(20px);border-top:1px solid var(--card-border);padding:12px 0 20px;margin-top:auto;flex-shrink:0;}
+.bottom-nav{display:flex;background:var(--card);backdrop-filter:blur(20px);border-top:1px solid var(--card-border);padding:12px 0;padding-bottom:max(12px,env(safe-area-inset-bottom));flex-shrink:0;}
 .nav-item{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;cursor:pointer;transition:all 0.2s;padding:4px 0;}
 .nav-item .nav-icon{font-size:22px;transition:transform 0.2s;}
 .nav-item .nav-label{font-size:10px;color:var(--text2);font-weight:500;}
@@ -221,7 +225,7 @@ body{font-family:'Noto Sans KR',sans-serif;background:linear-gradient(135deg,#c8
 .settings-chevron{color:var(--text2);}
 
 /* MODALS */
-.modal-overlay{display:none;position:absolute;inset:0;background:rgba(10,30,60,0.4);backdrop-filter:blur(4px);z-index:100;align-items:flex-end;}
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(10,30,60,0.4);backdrop-filter:blur(4px);z-index:100;align-items:flex-end;}
 .modal-overlay.active{display:flex;}
 .modal-sheet{width:100%;background:linear-gradient(160deg,#ddeeff 0%,#c8dff5 100%);border-radius:28px 28px 0 0;padding:20px;max-height:85%;overflow-y:auto;scrollbar-width:none;}
 .modal-sheet::-webkit-scrollbar{display:none;}
@@ -244,7 +248,7 @@ body{font-family:'Noto Sans KR',sans-serif;background:linear-gradient(135deg,#c8
 .tag-arm{background:rgba(74,144,217,0.15);color:var(--tag-arm);}
 .tag-rest{background:rgba(160,184,200,0.15);color:var(--tag-rest);}
 /* toast */
-.toast{position:absolute;top:70px;left:50%;transform:translateX(-50%) translateY(-20px);background:rgba(30,60,100,0.9);color:white;padding:10px 18px;border-radius:20px;font-size:12px;font-weight:600;white-space:nowrap;opacity:0;transition:all 0.3s;z-index:200;pointer-events:none;}
+.toast{position:fixed;top:60px;left:50%;transform:translateX(-50%) translateY(-20px);background:rgba(30,60,100,0.9);color:white;padding:10px 18px;border-radius:20px;font-size:12px;font-weight:600;white-space:nowrap;opacity:0;transition:all 0.3s;z-index:200;pointer-events:none;}
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
 .empty-state{text-align:center;padding:30px 20px;color:var(--text2);}
 .empty-icon{font-size:40px;margin-bottom:8px;}
@@ -262,10 +266,6 @@ body{font-family:'Noto Sans KR',sans-serif;background:linear-gradient(135deg,#c8
 </head>
 <body>
 <div class="phone" id="app">
-  <div class="status-bar">
-    <span id="status-time">10:45</span>
-    <div class="status-icons"><span>📶</span><span>🔋</span></div>
-  </div>
   <div class="toast" id="toast"></div>
 
   <!-- HOME -->
@@ -730,12 +730,7 @@ function updateAllCounts(){
   document.getElementById('my-total-hours').textContent=totalH;
 }
 
-// Clock
-function updateClock(){
-  const n=new Date();
-  document.getElementById('status-time').textContent=`${String(n.getHours()).padStart(2,'0')}:${String(n.getMinutes()).padStart(2,'0')}`;
-}
-updateClock();setInterval(updateClock,10000);
+// Clock removed (using real device status bar)
 
 // ═══════════════════════════════════════════════
 //  NAV
