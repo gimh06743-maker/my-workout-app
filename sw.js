@@ -1,4 +1,4 @@
-const CACHE_NAME = 'fitflow-v1';
+const CACHE_NAME = 'fitflow-v2';
 const ASSETS = [
   '/my-workout-app/workout_app.html',
   '/my-workout-app/manifest.json',
